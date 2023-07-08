@@ -1,125 +1,123 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS
-from flask_mysqldb import MySQL
-
-from config import config
-
-
-app = Flask(__name__)
-CORS(app)
-
-conexion = MySQL(app)
-
-@app.route('/productos', methods=['GET'])
-def listar_productos():
-    try:
-        cursor = conexion.connection.cursor()
-        sql = 'SELECT * FROM producto;'
-        cursor.execute(sql)
-        datos = cursor.fetchall()
-        productos= []
-        for producto in datos:
-
-            producto = {
-                'codigo': producto[0],
-                'nombre': producto[1],
-                'descripcion': producto[2],
-                'precio': producto[3],
-                'stock': producto[4],
-                'categoria': producto[5],
-                'imagen': producto[6],
-            }
-            productos.append(producto)
-    
-        return jsonify({'productos': productos, 'mensaje': "productos listados"})
-
-    except Exception as e:
-        return jsonify({'mensaje': "no se encontro el producto"})
-    
-@app.route('/producto/<codigo>', methods= ['GET'])
-def producto(codigo):
-    try:
-        cursor= conexion.connection.cursor()
-        sql= "SELECT * FROM producto WHERE codigo = '{0}'".format(codigo)
-        cursor.execute(sql)
-        datos= cursor.fetchone()
-        if datos != None:
-            producto = {
-                'codigo': datos[0],
-                'nombre': datos[1],
-                'descripcion': datos[2],
-                'precio': datos[3],
-                'stock': datos[4],
-                'categoria': datos[5],
-                'imagen': datos[6],
-            }
-            return jsonify({'producto': producto, 'mensaje': 'El producto ha sido encontrado'})
-        
-        else:
-            return jsonify({"mensaje": "Producto no encontrado"})
-
-    except Exception as e:
-        return jsonify({'mensaje': "no se encontro el producto"})
-    
-@app.route('/producto', methods = ['POST'])
-def registrar_producto():
-    try:
-        cursor= conexion.connection.cursor()
-        sql = """INSERT INTO producto(nombre, descripcion,precio, stock, categoria, imagen)  
-                VALUES ('{0}','{1}', {2}, {3}, '{4}', '{5}')""".format(request.json['nombre'], request.json['descripcion'],
-                                                                        request.json['precio'], request.json['stock'], 
-                                                                        request.json['categoria'],request.json['imagen'])
-        cursor.execute(sql)
-        conexion.connection.commit()
-        return jsonify({"mensaje": "producto registrado"})
-    
-    except Exception as e:
-        return jsonify({'mensaje': "no se pudo registrar el producto"})
-
-    
-@app.route('/delete/<codigo>', methods= ["DELETE"])
-def delete(codigo):
-    try:
-        cursor = conexion.connection.cursor()
-        sql = "DELETE FROM producto WHERE codigo = %s"
-        cursor.execute(sql, (codigo,))
-        conexion.connection.commit()
-        return jsonify({"mensaje": "producto fue eliminado correctamente"})
+from flask import Flask ,jsonify ,request
+# del modulo flask importar la clase Flask y los métodos jsonify,request
+from flask_cors import CORS       # del modulo flask_cors importar CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 
 
-    except Exception as e:
-        return jsonify({'mensaje': "no se pudo eliminar el producto, no existe el codigo que ingreso"})
+
+app=Flask(__name__)  # crear el objeto app de la clase Flask
+CORS(app) #modulo cors es para que me permita acceder desde el frontend al backend
 
 
-@app.route('/update/<codigo>', methods=['PUT'])
-def actualizar_producto(codigo):
-    try:
-        cursor= conexion.connection.cursor()
-        sql = """UPDATE producto SET nombre= '{0}', descripcion = '{1}', precio = '{2}', stock= '{3}', categoria= '{4}', imagen='{5}'
-          WHERE codigo= '{6}'""".format(request.json['nombre'], request.json['descripcion'],
-                                    request.json['precio'], request.json['stock'], 
-                                    request.json['categoria'],request.json['imagen'], codigo)        
-        cursor.execute(sql)
-        conexion.connection.commit()
-        return jsonify({'mensaje': 'Producto actualizado correctamente'})
+# configuro la base de datos, con el nombre el usuario y la clave
+app.config['SQLALCHEMY_DATABASE_URI']='mysql+pymysql://eduz14:MyNewPass@eduz14.mysql.pythonanywhere-services.com/eduz14$losliriosBD'
+# app.config['SQLALCHEMY_DATABASE_URI']='mysql+pymysql://root:MyNewPass@localhost/liriosDB'
 
-    except Exception as e:
-        return jsonify({'mensaje': "no se pudo actualizar el producto, no existe el codigo que ingreso"})
+# URI de la BBDD                          driver de la BD  user:clave@URLBBDD/nombreBBDD
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False #none
+db= SQLAlchemy(app)   #crea el objeto db de la clase SQLAlquemy
+ma=Marshmallow(app)   #crea el objeto ma de de la clase Marshmallow
 
-    
+
+
+# defino la tabla
+class Producto(db.Model):   # la clase Producto hereda de db.Model
+    codigo=db.Column(db.Integer, primary_key=True, autoincrement=True )   #define los campos de la tabla
+    nombre=db.Column(db.String(100))
+    descripcion=db.Column(db.String(200))
+    precio=db.Column(db.Integer)
+    stock=db.Column(db.Integer)
+    categoria=db.Column(db.Enum('lirios','frutales','herramientas'))
+    imagen=db.Column(db.String(400))
+    def __init__(self,nombre,descripcion,precio,stock,categoria,imagen):   #crea el  constructor de la clase
+        self.nombre=nombre   # no hace falta el id porque lo crea sola mysql por ser auto_incremento
+        self.descripcion=descripcion
+        self.precio=precio
+        self.stock=stock
+        self.categoria=categoria
+        self.imagen=imagen
 
 
 
 
 
+    #  si hay que crear mas tablas , se hace aqui
+
+with app.app_context():
+    db.create_all()  # aqui crea todas las tablas
+#  ************************************************************
+class ProductoSchema(ma.Schema): #definimos como se muestran los datos en la tabla
+    class Meta:
+        fields=('codigo','nombre','descripcion','precio','stock','categoria','imagen')
 
 
 
 
-def pagina_no_encontrada(error):
-    return "<h1>La pagina a la que intentas acceder no existe, intenta con una url diferente</h1>", 404
+producto_schema=ProductoSchema()            # El objeto producto_schema es para traer un producto
+productos_schema=ProductoSchema(many=True)  # El objeto productos_schema es para traer multiples registros de producto
 
-if __name__ == '__main__':
-    app.config.from_object(config["development"])
-    app.register_error_handler(404, pagina_no_encontrada)
-    app.run()
+
+
+
+# crea los endpoint o rutas (json)
+@app.route('/productos',methods=['GET'])
+def get_Productos():
+    all_productos=Producto.query.all()         # el metodo query.all() lo hereda de db.Model
+    result=productos_schema.dump(all_productos)  # el metodo dump() lo hereda de ma.schema y
+                                                 # trae todos los registros de la tabla
+    return jsonify(result)                       # retorna un JSON de todos los registros de la tabla
+
+
+
+
+@app.route('/producto/<codigo>',methods=['GET'])
+def get_producto(codigo):
+    producto=Producto.query.get(codigo)
+    return producto_schema.jsonify(producto)   # retorna el JSON de un producto recibido como parametro
+
+
+
+
+@app.route('/delete/<codigo>',methods=['DELETE'])
+def delete_producto(codigo):
+    producto=Producto.query.get(codigo)
+    db.session.delete(producto)
+    db.session.commit()
+    return producto_schema.jsonify(producto)   # me devuelve un json con el registro eliminado
+
+
+@app.route('/producto', methods=['POST']) # crea ruta o endpoint
+def create_producto():
+    #print(request.json)  # request.json contiene el json que envio el cliente
+    nombre=request.json['nombre']
+    descripcion=request.json['descripcion']
+    precio=request.json['precio']
+    stock=request.json['stock']
+    categoria=request.json['categoria']
+    imagen=request.json['imagen']
+    new_producto=Producto(nombre,descripcion,precio,stock,categoria,imagen)
+    db.session.add(new_producto)
+    db.session.commit()
+    return producto_schema.jsonify(new_producto)
+
+
+@app.route('/update/<codigo>' ,methods=['PUT'])
+def update_producto(codigo):
+    producto=Producto.query.get(codigo)
+
+    producto.nombre=request.json['nombre']
+    producto.descripcion=request.json['descripcion']
+    producto.precio=request.json['precio']
+    producto.stock=request.json['stock']
+    producto.categoria=request.json['categoria']
+    producto.imagen=request.json['imagen']
+
+    db.session.commit()
+    return producto_schema.jsonify(producto)
+
+
+
+# programa principal *******************************
+if __name__=='__main__':
+    app.run(debug=True, port=5000)    # ejecuta el servidor Flask en el puerto 5000
