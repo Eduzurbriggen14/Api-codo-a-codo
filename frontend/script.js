@@ -26,12 +26,16 @@ document.addEventListener("DOMContentLoaded", function() {
   // Obtener la lista de productos desde el backend
   function obtenerProductos() {
     fetch("http://127.0.0.1:5000/productos")
+    //fetch("http://eduz14.pythonanywhere.com/productos")
+    
       .then((response) => response.json())
       .then((data) => {
-        mostrarProductos(data.productos);
+        mostrarProductos(data);
+        // mostrarProductos(data.productos);
       })
       .catch((error) => console.log(error));
   }
+
 
   // Mostrar los productos en la tabla
   function mostrarProductos(productos) {
@@ -104,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function() {
       imagen: imagenInput.value,
     };
 
+    // fetch("http://eduz14.pythonanywhere.com/producto", {
     fetch("http://127.0.0.1:5000/producto", {
       method: "POST",
       headers: {
@@ -187,6 +192,7 @@ document.addEventListener("DOMContentLoaded", function() {
       imagen: imagen,
     };
 
+    // fetch("http://eduz14.pythonanywhere.com/producto", {
     fetch(`http://127.0.0.1:5000/update/${codigo}`, {
       method: "PUT",
       headers: {
@@ -218,6 +224,7 @@ document.addEventListener("DOMContentLoaded", function() {
    function eliminarProducto(event) {
     const codigo = event.target.closest("tr").dataset.codigo;
 
+    // fetch("http://eduz14.pythonanywhere.com/producto", {
     fetch(`http://127.0.0.1:5000/delete/${codigo}`, {
       method: "DELETE",
     })

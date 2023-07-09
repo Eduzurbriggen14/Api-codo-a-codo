@@ -11,8 +11,8 @@ CORS(app) #modulo cors es para que me permita acceder desde el frontend al backe
 
 
 # configuro la base de datos, con el nombre el usuario y la clave
-app.config['SQLALCHEMY_DATABASE_URI']='mysql+pymysql://eduz14:MyNewPass@eduz14.mysql.pythonanywhere-services.com/eduz14$losliriosBD'
-# app.config['SQLALCHEMY_DATABASE_URI']='mysql+pymysql://root:MyNewPass@localhost/liriosDB'
+#app.config['SQLALCHEMY_DATABASE_URI']='mysql+pymysql://eduz14:MyNewPass@eduz14.mysql.pythonanywhere-services.com/eduz14$losliriosBD'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql+pymysql://root:MyNewPass@localhost/liriosDB'
 
 # URI de la BBDD                          driver de la BD  user:clave@URLBBDD/nombreBBDD
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False #none
@@ -30,6 +30,7 @@ class Producto(db.Model):   # la clase Producto hereda de db.Model
     stock=db.Column(db.Integer)
     categoria=db.Column(db.Enum('lirios','frutales','herramientas'))
     imagen=db.Column(db.String(400))
+
     def __init__(self,nombre,descripcion,precio,stock,categoria,imagen):   #crea el  constructor de la clase
         self.nombre=nombre   # no hace falta el id porque lo crea sola mysql por ser auto_incremento
         self.descripcion=descripcion
