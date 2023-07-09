@@ -4,21 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>crud</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles1.css">
     
 </head>
 <body>
+  <button id="btnMostrarFormulario" >Agregar nuevo producto</button>
 
-    <div id="formulario">
-    <input type="text" id="codigo" placeholder="Código">
-    <input type="text" id="nombre" placeholder="Nombre">
-    <input type="text" id="descripcion" placeholder="Descripción">
-    <input type="text" id="precio" placeholder="Precio">
-    <input type="text" id="stock" placeholder="Stock">
-    <input type="text" id="categoria" placeholder="Categoría">
-    <input type="text" id="imagen" placeholder="URL de la imagen">
-    <button id="btnAgregar">Agregar</button>
+  <div id="ventanaFormulario">
+    <div id="formulario" style="display: none;">
+      <h2>Complete los campos para agregar un nuevo producto</h2>
+      <!-- <input type="text" id="codigo" placeholder="Código"> -->
+      <input type="text" id="nombre" placeholder="Nombre">
+      <input type="text" id="descripcion" placeholder="Descripción">
+      <input type="text" id="precio" placeholder="Precio">
+      <input type="text" id="stock" placeholder="Stock">
+      <select id="categoria">
+        <option value="">Seleccione una categoría</option>
+        <option value="lirios">lirios</option>
+        <option value="herramientas">herramientas</option>
+        <option value="frutales">frutales</option>
+      </select>
+      <input type="text" id="imagen" placeholder="URL de la imagen">
+      <div>
+        <button type="button" id="btnAgregarFormulario">Agregar</button>
+        <button type="button" id="btnCancelarFormulario">Cancelar</button>
+      </div>    
     </div>
+  </div>
 
   <table id="productosTable">
     <thead>

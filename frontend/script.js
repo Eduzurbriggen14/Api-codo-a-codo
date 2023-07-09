@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   const productosTable = document.getElementById("productosTable");
   const productosBody = document.getElementById("productosBody");
   const formulario = document.getElementById("formulario");
@@ -9,40 +9,84 @@ document.addEventListener("DOMContentLoaded", function() {
   const stockInput = document.getElementById("stock");
   const categoriaInput = document.getElementById("categoria");
   const imagenInput = document.getElementById("imagen");
-  const btnAgregar = document.getElementById("btnAgregar");
 
-  // Agregar evento de clic al botón "Actualizar" del formulario de edición
-  const btnActualizar = document.getElementById("btnActualizar");
-  btnActualizar.addEventListener("click", actualizarProducto);
+  const ventanaEmergente = document.getElementById("ventanaEmergente");
+  const formularioEditar = document.getElementById("formularioEditar");
+  const codigoEditarInput = document.getElementById("codigoEditar");
+  const nombreEditarInput = document.getElementById("nombreEditar");
+  const descripcionEditarInput = document.getElementById("descripcionEditar");
+  const precioEditarInput = document.getElementById("precioEditar");
+  const stockEditarInput = document.getElementById("stockEditar");
+  const categoriaEditarInput = document.getElementById("categoriaEditar");
+  const imagenEditarInput = document.getElementById("imagenEditar");
 
-  // Agregar evento de clic al botón "Cancelar" del formulario de edición
-  const btnCancelar = document.getElementById("btnCancelar");
-  btnCancelar.addEventListener("click", cancelarEdicion);
+  const ventanaFormulario = document.getElementById("ventanaFormulario");
 
-  // Agregar evento de clic al botón "Cerrar" de la ventana emergente
+  const btnMostrarFormulario = document.getElementById("btnMostrarFormulario");
+  btnMostrarFormulario.addEventListener("click", mostrarFormulario);
+
+  const btnAgregarFormulario = document.getElementById("btnAgregarFormulario");
+  btnAgregarFormulario.addEventListener("click", agregarProducto);
+
+  const btnCancelarFormulario = document.getElementById(
+    "btnCancelarFormulario"
+  );
+  btnCancelarFormulario.addEventListener("click", cancelarAgregarProducto);
+
   const btnCerrar = document.getElementById("btnCerrar");
   btnCerrar.addEventListener("click", ocultarFormularioEditar);
 
-  // Obtener la lista de productos desde el backend
-  function obtenerProductos() {
-    fetch("http://127.0.0.1:5000/productos")
-    //fetch("http://eduz14.pythonanywhere.com/productos")
-    
+  obtenerProductos();
+
+  function mostrarFormulario() {
+    ventanaFormulario.style.display = "block";
+    formulario.style.display = "flex";
+  }
+
+  function cancelarAgregarProducto() {
+    limpiarFormulario();
+    ventanaFormulario.style.display = "none";
+    formulario.style.display = "none";
+  }
+
+  function agregarProducto() {
+    const producto = {
+      nombre: nombreInput.value,
+      descripcion: descripcionInput.value,
+      precio: precioInput.value,
+      stock: stockInput.value,
+      categoria: categoriaInput.value,
+      imagen: imagenInput.value,
+    };
+
+    fetch("http://127.0.0.1:5000/producto", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(producto),
+    })
       .then((response) => response.json())
       .then((data) => {
-        mostrarProductos(data);
-        // mostrarProductos(data.productos);
+        obtenerProductos();
+        limpiarFormulario();
+        cancelarAgregarProducto();  //----------------------------------------------------------------
       })
       .catch((error) => console.log(error));
   }
 
+  function obtenerProductos() {
+    fetch("http://127.0.0.1:5000/productos")
+      .then((response) => response.json())
+      .then((data) => {
+        mostrarProductos(data);
+      })
+      .catch((error) => console.log(error));
+  }
 
-  // Mostrar los productos en la tabla
   function mostrarProductos(productos) {
-    // Limpiar contenido anterior de la tabla
     productosBody.innerHTML = "";
 
-    // Generar filas para cada producto
     productos.forEach((producto) => {
       const row = document.createElement("tr");
       row.setAttribute("data-codigo", producto.codigo);
@@ -96,35 +140,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  // Agregar un nuevo producto
-  function agregarProducto() {
-    const producto = {
-      codigo: codigoInput.value,
-      nombre: nombreInput.value,
-      descripcion: descripcionInput.value,
-      precio: precioInput.value,
-      stock: stockInput.value,
-      categoria: categoriaInput.value,
-      imagen: imagenInput.value,
-    };
-
-    // fetch("http://eduz14.pythonanywhere.com/producto", {
-    fetch("http://127.0.0.1:5000/producto", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(producto),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        obtenerProductos();
-        limpiarFormulario();
-      })
-      .catch((error) => console.log(error));
-  }
-
-  // Editar producto
   function editarProducto(event) {
     if (
       event.target.tagName === "BUTTON" &&
@@ -134,6 +149,7 @@ document.addEventListener("DOMContentLoaded", function() {
       const codigo = row.dataset.codigo;
 
       // Obtener los datos del producto de la fila correspondiente
+      //const codigo =row.querySelector("td:nth-child(1)").textContent
       const nombre = row.querySelector("td:nth-child(2)").textContent;
       const descripcion = row.querySelector("td:nth-child(3)").textContent;
       const precio = row.querySelector("td:nth-child(4)").textContent;
@@ -142,13 +158,13 @@ document.addEventListener("DOMContentLoaded", function() {
       const imagen = row.querySelector("img").src;
 
       // Cargar los datos del producto en el formulario de edición
-      const codigoEditarInput = document.getElementById("codigoEditar");
-      const nombreEditarInput = document.getElementById("nombreEditar");
-      const descripcionEditarInput = document.getElementById("descripcionEditar");
-      const precioEditarInput = document.getElementById("precioEditar");
-      const stockEditarInput = document.getElementById("stockEditar");
-      const categoriaEditarInput = document.getElementById("categoriaEditar");
-      const imagenEditarInput = document.getElementById("imagenEditar");
+      // const codigoEditarInput = document.getElementById("codigoEditar");
+      // const nombreEditarInput = document.getElementById("nombreEditar");
+      // const descripcionEditarInput = document.getElementById("descripcionEditar");
+      // const precioEditarInput = document.getElementById("precioEditar");
+      // const stockEditarInput = document.getElementById("stockEditar");
+      // const categoriaEditarInput = document.getElementById("categoriaEditar");
+      // const imagenEditarInput = document.getElementById("imagenEditar");
 
       codigoEditarInput.value = codigo;
       nombreEditarInput.value = nombre;
@@ -158,29 +174,24 @@ document.addEventListener("DOMContentLoaded", function() {
       categoriaEditarInput.value = categoria;
       imagenEditarInput.value = imagen;
 
-      // Mostrar el formulario de edición
-      ventanaEmergente.style.display = "flex";
-      formularioEditar.style.display = "block";
+    ventanaEmergente.style.display = "flex";
+    formularioEditar.style.display = "block";
 
-      // Agregar evento de clic al botón "Actualizar" del formulario de edición
-      const btnActualizar = document.getElementById("btnActualizar");
-      btnActualizar.addEventListener("click", actualizarProducto);
+    const btnActualizar = document.getElementById("btnActualizar");
+    btnActualizar.addEventListener("click", actualizarProducto);
 
-      // Agregar evento de clic al botón "Cancelar" del formulario de edición
-      const btnCancelar = document.getElementById("btnCancelar");
-      btnCancelar.addEventListener("click", ocultarFormularioEditar);
-    }
-  }
+    const btnCancelar = document.getElementById("btnCancelar");
+    btnCancelar.addEventListener("click", cancelarEdicion);
+  }}
 
-  // Actualizar producto
   function actualizarProducto() {
-    const codigo = document.getElementById("codigoEditar").value;
-    const nombre = document.getElementById("nombreEditar").value;
-    const descripcion = document.getElementById("descripcionEditar").value;
-    const precio = document.getElementById("precioEditar").value;
-    const stock = document.getElementById("stockEditar").value;
-    const categoria = document.getElementById("categoriaEditar").value;
-    const imagen = document.getElementById("imagenEditar").value;
+    const codigo = codigoEditarInput.value;
+    const nombre = nombreEditarInput.value;
+    const descripcion = descripcionEditarInput.value;
+    const precio = precioEditarInput.value;
+    const stock = stockEditarInput.value;
+    const categoria = categoriaEditarInput.value;
+    const imagen = imagenEditarInput.value;
 
     const producto = {
       codigo: codigo,
@@ -192,7 +203,6 @@ document.addEventListener("DOMContentLoaded", function() {
       imagen: imagen,
     };
 
-    // fetch("http://eduz14.pythonanywhere.com/producto", {
     fetch(`http://127.0.0.1:5000/update/${codigo}`, {
       method: "PUT",
       headers: {
@@ -204,27 +214,26 @@ document.addEventListener("DOMContentLoaded", function() {
       .then((data) => {
         obtenerProductos();
         limpiarFormulario();
-        ocultarFormularioEditar();
+        ventanaEmergente.style.display = "none";
+        formularioEditar.style.display = "none";
       })
       .catch((error) => console.log(error));
   }
-   // Cancelar la edición de un producto
-   function cancelarEdicion() {
+
+  function cancelarEdicion() {
     limpiarFormulario();
-    ocultarFormularioEditar();
+    ventanaEmergente.style.display = "none";
+    formularioEditar.style.display = "none";
   }
 
-  // Ocultar la ventana emergente y el formulario de edición
   function ocultarFormularioEditar() {
     ventanaEmergente.style.display = "none";
     formularioEditar.style.display = "none";
   }
 
-   // Eliminar un producto existente------------------------------------
-   function eliminarProducto(event) {
-    const codigo = event.target.closest("tr").dataset.codigo;
+  function eliminarProducto(event) {
+    const codigo = event.target.closest("tr").getAttribute("data-codigo");
 
-    // fetch("http://eduz14.pythonanywhere.com/producto", {
     fetch(`http://127.0.0.1:5000/delete/${codigo}`, {
       method: "DELETE",
     })
@@ -236,27 +245,12 @@ document.addEventListener("DOMContentLoaded", function() {
       .catch((error) => console.log(error));
   }
 
-  // Limpiar el formulario
   function limpiarFormulario() {
-    codigoInput.value = "";
     nombreInput.value = "";
-    descripcionInput.value = "";
-    precioInput.value = "";
-    stockInput.value = "";
-    categoriaInput.value = "";
-    imagenInput.value = "";
+        descripcionInput.value = "";
+        precioInput.value = "";
+        stockInput.value = "";
+        categoriaInput.value = "";
+        imagenInput.value = "";
   }
-
-  // Evento para agregar un nuevo producto
-  btnAgregar.addEventListener("click", agregarProducto);
-
-  // Obtener los productos al cargar la página
-  obtenerProductos();
 });
-
-
-
-
-
-
-

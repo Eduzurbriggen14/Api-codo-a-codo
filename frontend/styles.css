@@ -1,5 +1,38 @@
+#btnMostrarFormulario {
+  font-size: 20px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin: 15px;
+  background-color: #891d44;
+  color: #e6e6e6;
+  box-shadow: 0 2px 4pg rgba(0, 0, 0, 0.2);
+}
+
+#ventanaFormulario {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color:#891d44;
+  width: 100%;
+  height: 100%;
+}
+
 #formulario {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 70%; 
+  max-width: 500px; 
+  margin: 0 auto; 
+  padding: 20px; 
+  box-sizing: border-box; 
+}
+#formulario h2{
+  color :#e6e6e6;
 }
 
 #formulario input[type="text"],
@@ -56,6 +89,6 @@
 }
 
 #productosTable td img {
-  width: 200px; /* Ajusta el ancho de la imagen según tus necesidades */
-  height: 150px; /* Ajusta la altura de la imagen según tus necesidades */
+  width: 200px; 
+  height: 150px; 
 }
